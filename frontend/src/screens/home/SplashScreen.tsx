@@ -1,7 +1,19 @@
+import { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { colors } from "../../theme/colors";
 
-export default function SplashScreen() {
+type Props = NativeStackScreenProps<any>;
+
+export default function SplashScreen({ navigation }: Props) {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigation.replace("Onboarding");
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [navigation]);
+
   return (
     <View style={styles.container}>
       <Text style={styles.icon}>📅</Text>
