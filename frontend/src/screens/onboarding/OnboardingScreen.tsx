@@ -26,7 +26,7 @@ const OnboardingScreen = ({ navigation }: Props) => {
         index: currentIndex + 1,
       });
     } else {
-      navigation.navigate("Login");
+      navigation.replace("Auth");
     }
   };
 

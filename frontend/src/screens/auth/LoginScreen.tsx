@@ -1,36 +1,123 @@
-import { View, Text, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
+
+import CustomInput from "../../components/CustomInput";
+import CustomButton from "../../components/CustomButton";
 import { colors } from "../../theme/colors";
 
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }: any) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = () => {
+    // Backend integration later
+    navigation.getParent()?.replace("Main");
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.icon}>🔐</Text>
-      <Text style={styles.title}>Login</Text>
-      <Text style={styles.subtitle}>
-        Securely access your CheckDay account.
-      </Text>
-    </View>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.title}>Welcome Back 👋</Text>
+
+        <Text style={styles.subtitle}>
+          Sign in to continue using CheckDay.
+        </Text>
+
+        <CustomInput
+          label="Email"
+          placeholder="Enter your email"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={setEmail}
+        />
+
+        <CustomInput
+          label="Password"
+          placeholder="Enter your password"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+
+        <CustomButton
+          title="Login"
+          onPress={handleLogin}
+        />
+
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            Don't have an account?
+          </Text>
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Signup")}
+          >
+            <Text style={styles.link}>
+              Sign Up
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: "#fff",
+  },
+
+  content: {
+    flexGrow: 1,
+    justifyContent: "center",
+    padding: 24,
+  },
+
+  title: {
+    fontSize: 32,
+    fontWeight: "700",
+    color: colors.text,
+    marginBottom: 10,
+  },
+
+  subtitle: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    marginBottom: 35,
+  },
+
+  footer: {
+    marginTop: 30,
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
   },
-  icon: {
-    fontSize: 60,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "700",
-    marginTop: 20,
-    color: colors.primary,
-  },
-  subtitle: {
-    marginTop: 10,
+
+  footerText: {
     color: colors.textSecondary,
+    fontSize: 15,
+  },
+
+  link: {
+    color: colors.primary,
+    fontWeight: "600",
+    marginLeft: 5,
+    fontSize: 15,
   },
 });
