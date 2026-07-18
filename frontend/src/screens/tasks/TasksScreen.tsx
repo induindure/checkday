@@ -12,6 +12,13 @@ import WeekHeader from "../../components/planner/WeekHeader";
 import PlannerGrid from "../../components/planner/PlannerGrid";
 import AddTaskModal from "../../components/planner/AddTaskModal";
 
+import { useEffect } from "react";
+import {
+  getTasks,
+  createTask,
+  deleteTask,
+} from "../../services/api";
+
 export interface Task {
   id: string;
   name: string;
@@ -35,164 +42,57 @@ export default function TasksScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskMenuVisible, setTaskMenuVisible] = useState(false);
-  const [tasks, setTasks] = useState<Task[]>([
-  {
-    id: "1",
-    name: "Database Assignment",
-    time: "09:00 AM",
-    repeatDays: ["Mon", "Wed", "Fri"],
-    priority: "High",
-    notes: "",
-    completed: {
-      Mon: false,
-      Tue: false,
-      Wed: false,
-      Thu: false,
-      Fri: false,
-      Sat: false,
-      Sun: false,
-    },
-  },
-  {
-    id: "2",
-    name: "React Native Project",
-    time: "11:00 AM",
-    repeatDays: ["Tue", "Thu"],
-    priority: "High",
-    notes: "",
-    completed: {
-      Mon: false,
-      Tue: false,
-      Wed: false,
-      Thu: false,
-      Fri: false,
-      Sat: false,
-      Sun: false,
-    },
-  },
-  {
-    id: "3",
-    name: "Gym",
-    time: "06:00 PM",
-    repeatDays: ["Mon", "Wed", "Fri", "Sat"],
-    priority: "Medium",
-    notes: "",
-    completed: {
-      Mon: false,
-      Tue: false,
-      Wed: false,
-      Thu: false,
-      Fri: false,
-      Sat: false,
-      Sun: false,
-    },
-  },
-  {
-    id: "4",
-    name: "Read Book",
-    time: "08:00 PM",
-    repeatDays: ["Daily"],
-    priority: "Low",
-    notes: "",
-    completed: {
-      Mon: false,
-      Tue: false,
-      Wed: false,
-      Thu: false,
-      Fri: false,
-      Sat: false,
-      Sun: false,
-    },
-  },
-  {
-    id: "5",
-    name: "Drink Water",
-    time: "All Day",
-    repeatDays: ["Daily"],
-    priority: "High",
-    notes: "",
-    completed: {
-      Mon: false,
-      Tue: false,
-      Wed: false,
-      Thu: false,
-      Fri: false,
-      Sat: false,
-      Sun: false,
-    },
-  },
-  {
-    id: "6",
-    name: "Study AI",
-    time: "04:00 PM",
-    repeatDays: ["Tue", "Thu", "Sun"],
-    priority: "High",
-    notes: "",
-    completed: {
-      Mon: false,
-      Tue: false,
-      Wed: false,
-      Thu: false,
-      Fri: false,
-      Sat: false,
-      Sun: false,
-    },
-  },
-  {
-    id: "7",
-    name: "Team Meeting",
-    time: "02:00 PM",
-    repeatDays: ["Fri"],
-    priority: "Medium",
-    notes: "",
-    completed: {
-      Mon: false,
-      Tue: false,
-      Wed: false,
-      Thu: false,
-      Fri: false,
-      Sat: false,
-      Sun: false,
-    },
-  },
-  {
-    id: "8",
-    name: "Revision",
-    time: "09:00 PM",
-    repeatDays: ["Sat", "Sun"],
-    priority: "Medium",
-    notes: "",
-    completed: {
-      Mon: false,
-      Tue: false,
-      Wed: false,
-      Thu: false,
-      Fri: false,
-      Sat: false,
-      Sun: false,
-    },
-  },
-]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+useEffect(() => {
+  loadTasks();
+}, []);
 
-  const addTask = (task: Omit<Task, "id" | "completed">) => {
-  setTasks((prev) => [
-    ...prev,
-    {
-      ...task,
-      id: Date.now().toString(),
+const loadTasks = async () => {
+  try {
+    const data = await getTasks();
 
-      completed: {
-        Mon: false,
-        Tue: false,
-        Wed: false,
-        Thu: false,
-        Fri: false,
-        Sat: false,
-        Sun: false,
-      },
-    },
-  ]);
+    setTasks(
+      data.map((task: any) => ({
+        ...task,
+        id: task.id.toString(),
+      }))
+    );
+  } catch (error) {
+    console.log(error);
+  }
 };
+  const addTask = async (task: Omit<Task, "id" | "completed">) => {
+  try {
+    await createTask({
+      name: task.name,
+      time: task.time,
+      repeatDays: task.repeatDays,
+      priority: task.priority,
+      notes: task.notes,
+    });
+
+    await loadTasks();
+
+    setModalVisible(false);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+  const handleDeleteTask = async () => {
+  if (!selectedTask) return;
+
+  try {
+    await deleteTask(selectedTask.id);
+
+    await loadTasks();
+
+    setTaskMenuVisible(false);
+    setSelectedTask(null);
+  } catch (error) {
+    console.log("Delete Error:", error);
+  }
+};  
 
   const handleTaskPress = (task: Task) => {
   setSelectedTask(task);
@@ -262,8 +162,9 @@ export default function TasksScreen() {
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={{ paddingVertical: 15 }}
-      >
+  style={{ paddingVertical: 15 }}
+  onPress={handleDeleteTask}
+>
         <Text
           style={{
             fontSize: 18,
